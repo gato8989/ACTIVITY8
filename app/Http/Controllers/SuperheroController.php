@@ -7,6 +7,25 @@ use Illuminate\Http\Request;
 
 class SuperheroController extends Controller
 {
+    public function destroy(Superhero $superhero)
+    {
+        $superhero->delete();
+        return redirect()->route('superheroes.index')
+            ->with('success', 'Superhero moved to trash');
+    }
+
+    public function deleted()
+    {
+        $deletedSuperheroes = Superhero::onlyTrashed()->get();
+        return view('superheroes.deleted', compact('deletedSuperheroes'));
+    }
+
+    public function restore($id)
+    {
+        Superhero::withTrashed()->find($id)->restore();
+        return redirect()->route('superheroes.deleted')
+            ->with('success', 'Superhero restored successfully');
+    }
     public function index()
     {
         $superheroes = Superhero::all();
@@ -16,21 +35,6 @@ class SuperheroController extends Controller
     public function create()
     {
         return view('superheroes.create');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'real_name' => 'required',
-            'hero_name' => 'required|unique:superheroes',
-            'photo_url' => 'required|url',
-            'additional_info' => 'nullable'
-        ]);
-
-        Superhero::create($request->all());
-
-        return redirect()->route('superheroes.index')
-            ->with('success', 'Superhero created successfully.');
     }
 
     public function show(Superhero $superhero)
@@ -57,12 +61,25 @@ class SuperheroController extends Controller
         return redirect()->route('superheroes.index')
             ->with('success', 'Superhero updated successfully');
     }
-
-    public function destroy(Superhero $superhero)
+    public function store(Request $request)
     {
-        $superhero->delete();
+        $request->validate([
+            'real_name' => 'required',
+            'hero_name' => 'required|unique:superheroes',
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'additional_info' => 'nullable'
+        ]);
+
+        $path = $request->file('photo')->store('superheroes', 'public');
+
+        Superhero::create([
+            'real_name' => $request->real_name,
+            'hero_name' => $request->hero_name,
+            'photo_path' => $path,
+            'additional_info' => $request->additional_info
+        ]);
 
         return redirect()->route('superheroes.index')
-            ->with('success', 'Superhero deleted successfully');
+            ->with('success', 'Superhero created successfully.');
     }
 }

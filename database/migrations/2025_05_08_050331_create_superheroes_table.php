@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('real_name');
             $table->string('hero_name')->unique();
-            $table->string('photo_url');
-            $table->text('additional_info');
+            $table->string('photo_path')->nullable(); // Changed from photo_url
+            $table->text('additional_info')->nullable(); // Made nullable
             $table->timestamps();
+            $table->softDeletes(); // For soft delete functionality
         });
     }
 

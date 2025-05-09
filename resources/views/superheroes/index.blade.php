@@ -26,6 +26,14 @@
         <th width="280px">Action</th>
     </tr>
     @foreach ($superheroes as $key => $superhero)
+    @if(!$superhero->trashed())
+    <tr>
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ $superhero->hero_name }}</td>
+        <td><img src="{{ $superhero->photo_url }}" width="50"></td>
+        <!-- Rest of the row -->
+    </tr>
+    @endif
     <tr>
         <td>{{ $key + 1 }}</td>
         <td>{{ $superhero->hero_name }}</td>
